@@ -2367,29 +2367,14 @@ function ReviewPage({ cart, customer, clearCart }) {
   const subtotal = getCartSubtotal(cart);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-      const placeOrder = () => {
-  if (isSubmitting) return;
+  const placeOrder = () => {
+    if (isSubmitting) return;
 
-  setIsSubmitting(true);
-  clearCart();
-  navigate("/checkout/success");
-};
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        alert(data.message || "Order failed.");
-        setIsSubmitting(false);
-        return;
-      }
-
-      clearCart();
-      navigate("/checkout/success");
-    } catch (error) {
-      console.error(error);
-      alert(error.message || "Something went wrong.");
-      setIsSubmitting(false);
-    }
+    setIsSubmitting(true);
+    clearCart();
+    navigate("/checkout/success");
   };
+  
 
   return (
     <CheckoutLayout
