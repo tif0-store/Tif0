@@ -2368,15 +2368,13 @@ function ReviewPage({ cart, customer, clearCart }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
       const placeOrder = async () => {
-      if (isSubmitting) return;
-      
-        setIsSubmitting(true);
-      
-        setTimeout(() => {
-          clearCart();
-          navigate("/checkout/success");
-        }, 700);
-      };
+  if (isSubmitting) return;
+
+  setIsSubmitting(true);
+
+  clearCart();
+  navigate("/checkout/success");
+};
 
       const data = await response.json();
 
