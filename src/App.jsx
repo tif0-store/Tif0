@@ -2367,22 +2367,16 @@ function ReviewPage({ cart, customer, clearCart }) {
   const subtotal = getCartSubtotal(cart);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const placeOrder = async () => {
-    if (isSubmitting) return;
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch("http://localhost:5050/api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          customer,
-          items: cart,
-        }),
-      });
+      const placeOrder = async () => {
+      if (isSubmitting) return;
+      
+        setIsSubmitting(true);
+      
+        setTimeout(() => {
+          clearCart();
+          navigate("/checkout/success");
+        }, 700);
+      };
 
       const data = await response.json();
 
