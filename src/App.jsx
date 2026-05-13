@@ -2367,15 +2367,13 @@ function ReviewPage({ cart, customer, clearCart }) {
   const subtotal = getCartSubtotal(cart);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-      const placeOrder = async () => {
+      const placeOrder = () => {
   if (isSubmitting) return;
 
   setIsSubmitting(true);
-
   clearCart();
   navigate("/checkout/success");
 };
-
       const data = await response.json();
 
       if (!response.ok || !data.success) {
