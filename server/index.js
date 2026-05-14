@@ -24,7 +24,6 @@ const VALID_PRODUCTS = {
     sizes: ["2x3ft", "3x5ft", "4x6ft"],
     bundleCount: 3,
   },
-
   "flag-america": {
     name: "America Flag",
     price: 14.99,
@@ -32,7 +31,6 @@ const VALID_PRODUCTS = {
     type: "single",
     sizes: ["2x3ft", "3x5ft", "4x6ft"],
   },
-
   "flag-canada": {
     name: "Canada Flag",
     price: 14.99,
@@ -40,7 +38,6 @@ const VALID_PRODUCTS = {
     type: "single",
     sizes: ["2x3ft", "3x5ft", "4x6ft"],
   },
-
   "flag-mexico": {
     name: "Mexico Flag",
     price: 14.99,
@@ -48,19 +45,16 @@ const VALID_PRODUCTS = {
     type: "single",
     sizes: ["2x3ft", "3x5ft", "4x6ft"],
   },
-
   "jersey-brazil": {
     name: "Brazil Jersey",
     price: 34.99,
     sizes: ["S", "M", "L", "XL", "XXL"],
   },
-
   "jersey-portugal": {
     name: "Portugal Jersey",
     price: 34.99,
     sizes: ["S", "M", "L", "XL", "XXL"],
   },
-
   "jersey-argentina": {
     name: "Argentina Jersey",
     price: 34.99,
@@ -81,28 +75,17 @@ const VALID_WORLD_CUP_NATIONS = new Set([
   "France",
   "Germany",
   "Ghana",
-  "Iran",
   "Italy",
   "Japan",
   "Mexico",
   "Morocco",
   "Netherlands",
   "Portugal",
-  "Qatar",
-  "Saudi Arabia",
-  "Senegal",
   "South Korea",
   "Spain",
-  "Switzerland",
-  "Tunisia",
+  "United States",
   "Uruguay",
-  "USA",
-  "Wales",
 ]);
-
-function roundMoney(value) {
-  return Math.round(Number(value) * 100) / 100;
-}
 
 function escapeHtml(value = "") {
   return String(value)
@@ -113,60 +96,74 @@ function escapeHtml(value = "") {
     .replaceAll("'", "&#039;");
 }
 
-function validateCustomer(customer) {
-  if (!customer) {
-    throw new Error("Customer details missing.");
-  }
+function roundMoney(value) {
+  return Math.round(Number(value) * 100) / 100;
+}
 
-  if (!customer.firstName || !customer.lastName || !customer.email || !customer.address) {
-    throw new Error("Required customer details missing.");
+function validateCustomer(customer = {}) {
+  const required = [
+    "firstName",
+    "lastName",
+    "email",
+    "phone",
+    "address",
+    "city",
+    "zip",
+  ];
+
+  for (const field of required) {
+    if (!customer[field] || String(customer[field]).trim() === "") {
+      throw new Error(`Missing customer field: ${field}`);
+    }
   }
 
   return {
-    firstName: customer.firstName.trim(),
-    lastName: customer.lastName.trim(),
-    email: customer.email.trim(),
-    phone: customer.phone?.trim() || "",
-    address: customer.address.trim(),
-    apartment: customer.apartment?.trim() || "",
-    city: customer.city?.trim() || "",
-    zip: customer.zip?.trim() || "",
+    firstName: String(customer.firstName).trim(),
+    lastName: String(customer.lastName).trim(),
+    email: String(customer.email).trim(),
+    phone: String(customer.phone).trim(),
+    address: String(customer.address).trim(),
+    apartment: customer.apartment ? String(customer.apartment).trim() : "",
+    city: String(customer.city).trim(),
+    zip: String(customer.zip).trim(),
   };
 }
 
-function validateItems(items) {
+function validateItems(items = []) {
   if (!Array.isArray(items) || items.length === 0) {
-    throw new Error("No items in order.");
+    throw new Error("Cart is empty.");
   }
 
   return items.map((item) => {
-    const product = VALID_PRODUCTS[item.id];
+    const productId = item.id || item.productId;
+    const product = VALID_PRODUCTS[productId];
 
     if (!product) {
-      throw new Error("Invalid product.");
+      throw new Error(`Invalid product: ${productId}`);
     }
 
-    const quantity = Number(item.quantity);
+    const quantity = Number(item.quantity || 1);
 
-    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
-      throw new Error(`Invalid quantity for ${product.name}`);
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      throw new Error("Invalid quantity.");
     }
 
-    if (!product.sizes.includes(item.selectedSize)) {
-      throw new Error(`Invalid size for ${product.name}`);
+    const selectedSize =
+      item.selectedSize || item.selectedSizeLabel || item.size || product.sizes[0];
+
+    if (!product.sizes.includes(selectedSize)) {
+      throw new Error(`Invalid size for ${product.name}.`);
     }
 
     let selectedCountries = [];
 
     if (product.type === "bundle") {
-      selectedCountries = item.selectedCountries || [];
+      selectedCountries = Array.isArray(item.selectedCountries)
+        ? item.selectedCountries
+        : [];
 
-      if (selectedCountries.length !== 3) {
-        throw new Error("Bundle requires 3 countries.");
-      }
-
-      if (new Set(selectedCountries).size !== selectedCountries.length) {
-        throw new Error("Duplicate bundle countries.");
+      if (selectedCountries.length !== product.bundleCount) {
+        throw new Error(`${product.name} requires ${product.bundleCount} countries.`);
       }
 
       for (const country of selectedCountries) {
@@ -176,44 +173,89 @@ function validateItems(items) {
       }
     }
 
+    const lineTotal = roundMoney(product.price * quantity);
+
     return {
-      id: item.id,
+      id: productId,
       name: product.name,
-      quantity,
       price: product.price,
-      selectedSize: item.selectedSize,
-      selectedSizeLabel: item.selectedSizeLabel || item.selectedSize,
+      quantity,
+      selectedSize,
+      selectedSizeLabel: selectedSize,
       selectedCountries,
-      lineTotal: roundMoney(product.price * quantity),
+      lineTotal,
     };
   });
 }
 
-function formatItems(items = []) {
+function formatItemsText(items = []) {
   return items
     .map((item) => {
-      const size = item.selectedSizeLabel || item.selectedSize;
-      const countries = item.selectedCountries?.length
-        ? ` | Flags: ${item.selectedCountries.join(", ")}`
-        : "";
+      const flags =
+        item.selectedCountries?.length > 0
+          ? ` | Flags: ${item.selectedCountries.join(", ")}`
+          : "";
 
-      return `${item.quantity}x ${item.name} (${size}) — $${item.price}${countries}`;
+      return `${item.quantity}x ${item.name} (${item.selectedSize}) - $${item.lineTotal.toFixed(
+        2
+      )}${flags}`;
     })
     .join("\n");
 }
 
+function formatItemsHtml(items = []) {
+  return items
+    .map((item) => {
+      const countries =
+        item.selectedCountries?.length > 0
+          ? `
+            <div style="margin-top:6px;font-size:13px;color:#666666;">
+              Flags: ${escapeHtml(item.selectedCountries.join(", "))}
+            </div>
+          `
+          : "";
+
+      return `
+        <tr>
+          <td style="padding:14px 0;border-bottom:1px solid #eeeeee;">
+            <div style="font-size:15px;font-weight:800;color:#111111;">
+              ${escapeHtml(item.quantity)}x ${escapeHtml(item.name)}
+            </div>
+            <div style="margin-top:4px;font-size:13px;color:#666666;">
+              Size: ${escapeHtml(item.selectedSize)}
+            </div>
+            ${countries}
+          </td>
+          <td style="padding:14px 0;border-bottom:1px solid #eeeeee;text-align:right;font-size:15px;font-weight:800;color:#111111;">
+            $${item.lineTotal.toFixed(2)}
+          </td>
+        </tr>
+      `;
+    })
+    .join("");
+}
+
 async function saveOrderToNotion(order) {
-  return notion.pages.create({
+  if (!process.env.NOTION_TOKEN || !process.env.NOTION_DATABASE_ID) {
+    console.log("Skipping Notion save: missing Notion env vars.");
+    return;
+  }
+
+  await notion.pages.create({
     parent: {
-      database_id: process.env.NOTION_ORDERS_DATABASE_ID,
+      database_id: process.env.NOTION_DATABASE_ID,
     },
-
     properties: {
-      "Order ID": {
-        title: [{ text: { content: order.id } }],
+      Name: {
+        title: [
+          {
+            text: {
+              content: order.id,
+            },
+          },
+        ],
       },
-
-      "Customer Name": {
+      Customer: {
         rich_text: [
           {
             text: {
@@ -222,183 +264,125 @@ async function saveOrderToNotion(order) {
           },
         ],
       },
-
       Email: {
         email: order.customer.email,
       },
-
       Phone: {
         phone_number: order.customer.phone,
       },
-
-      Address: {
-        rich_text: [
-          {
-            text: {
-              content: `${order.customer.address}, ${order.customer.city}, ${order.customer.zip}`,
-            },
-          },
-        ],
+      Total: {
+        number: order.total,
       },
-
       Items: {
         rich_text: [
           {
             text: {
-              content: formatItems(order.items),
+              content: formatItemsText(order.items),
             },
           },
         ],
       },
-
-      Total: {
-        number: order.total,
-      },
-
-      Status: {
-        status: {
-          name: "Pending",
-        },
+      Address: {
+        rich_text: [
+          {
+            text: {
+              content: `${order.customer.address}${
+                order.customer.apartment ? `, ${order.customer.apartment}` : ""
+              }, ${order.customer.city}, ${order.customer.zip}`,
+            },
+          },
+        ],
       },
     },
   });
 }
 
 async function sendBrevoEmail(order) {
-  console.log("Sending premium white TIF0 email template...");
+  if (!process.env.BREVO_API_KEY) {
+    console.log("Skipping Brevo email: missing BREVO_API_KEY.");
+    return;
+  }
 
-  const itemsHtml = order.items
-    .map((item) => {
-      const size = escapeHtml(
-        item.selectedSizeLabel || item.selectedSize || "One Size"
-      );
-
-      const countries = item.selectedCountries?.length
-        ? `
-          <div style="margin-top:8px;color:#006a4e;font-size:13px;font-weight:700;">
-            Flags: ${escapeHtml(item.selectedCountries.join(", "))}
-          </div>
-        `
-        : "";
-
-      return `
-        <tr>
-          <td style="padding:18px 0;border-bottom:1px solid #eeeeee;">
-            <div style="font-size:16px;font-weight:900;color:#111111;">
-              ${item.quantity}x ${escapeHtml(item.name)}
-            </div>
-
-            <div style="margin-top:6px;font-size:13px;color:#666666;">
-              Size: <strong style="color:#111111;">${size}</strong>
-            </div>
-
-            ${countries}
-          </td>
-
-          <td align="right" style="padding:18px 0;border-bottom:1px solid #eeeeee;font-size:16px;font-weight:900;color:#da291c;">
-            $${item.lineTotal.toFixed(2)}
-          </td>
-        </tr>
-      `;
-    })
-    .join("");
+  const senderEmail = process.env.BREVO_SENDER_EMAIL || "orders@tif0.store";
+  const senderName = process.env.BREVO_SENDER_NAME || "TIF0";
 
   const response = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
       "api-key": process.env.BREVO_API_KEY,
       "Content-Type": "application/json",
+      Accept: "application/json",
     },
     body: JSON.stringify({
       sender: {
-        name: process.env.BREVO_SENDER_NAME,
-        email: process.env.BREVO_SENDER_EMAIL,
+        name: senderName,
+        email: senderEmail,
       },
-
       to: [
         {
           email: order.customer.email,
           name: `${order.customer.firstName} ${order.customer.lastName}`,
         },
       ],
-
-      subject: `Your TIF0 order is confirmed — ${order.id}`,
-
+      subject: `TIF0 Order Confirmation - ${order.id}`,
       htmlContent: `
-        <div style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;color:#111111;">
-          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f8f8f6;padding:34px 12px;">
+        <div style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,Helvetica,sans-serif;color:#111111;">
+          <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f5f5f5;padding:30px 12px;">
             <tr>
               <td align="center">
-                <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:640px;background:#ffffff;border-radius:30px;overflow:hidden;border:2px solid #da291c;">
+                <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:640px;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #eaeaea;">
                   
                   <tr>
-                    <td style="background:#ffffff;padding:34px 28px;text-align:center;">
-  <a
-    href="https://tif0-store-tif0-s-projects.vercel.app"
-    target="_blank"
-    style="text-decoration:none;display:inline-block;"
-  >
-    <img
-      src="https://doeantbttqofenfvmjyo.supabase.co/storage/v1/object/public/Tif0/TIF0.png"
-      alt="TIF0"
-      width="180"
-      style="
-        display:block;
-        margin:0 auto;
-        width:180px;
-        max-width:180px;
-        height:auto;
-        border:0;
-        outline:none;
-        text-decoration:none;
-      "
-    />
-  </a>
-
-  <div style="margin-top:12px;font-size:12px;font-weight:900;letter-spacing:4px;color:#000000;text-transform:uppercase;">
-    Order Confirmed
-  </div>
+                    <td style="background:#111111;padding:34px 28px;text-align:center;">
+                      <div style="font-size:34px;font-weight:900;letter-spacing:5px;color:#ffffff;">
+                        TIF0
+                      </div>
+                      <div style="margin-top:8px;font-size:12px;font-weight:800;letter-spacing:2px;color:#cccccc;text-transform:uppercase;">
+                        Order Confirmation
+                      </div>
                     </td>
                   </tr>
 
                   <tr>
-                    <td style="padding:34px 30px 18px;text-align:center;">
-                      <div style="display:inline-block;background:#006a4e;color:#ffffff;border-radius:999px;padding:10px 18px;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">
-                        We received your order
-                      </div>
-
-                      <h1 style="margin:22px 0 0;font-size:32px;line-height:1.15;color:#111111;">
-                        Thank you, ${escapeHtml(order.customer.firstName)}.
+                    <td style="padding:32px 30px 16px;text-align:center;">
+                      <h1 style="margin:0;font-size:26px;line-height:1.3;font-weight:900;color:#111111;">
+                        Thank you, ${escapeHtml(order.customer.firstName)}!
                       </h1>
 
-                      <p style="margin:14px auto 0;max-width:440px;font-size:15px;line-height:1.7;color:#555555;">
-                        Your TIF0 order is confirmed. We’ll review it and contact you soon with the next steps.
+                      <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#555555;">
+                        Your order has been received successfully. We’ll contact you soon with updates.
                       </p>
                     </td>
                   </tr>
 
                   <tr>
-                    <td style="padding:12px 30px;">
-                      <table width="100%" role="presentation" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:24px;border:2px solid #da291c;">
+                    <td style="padding:10px 30px 0;">
+                      <div style="background:#f7f7f7;border:1px solid #eeeeee;border-radius:14px;padding:18px;text-align:center;">
+                        <div style="font-size:12px;font-weight:900;letter-spacing:2px;color:#006a4e;text-transform:uppercase;">
+                          Order ID
+                        </div>
+                        <div style="margin-top:8px;font-size:18px;font-weight:900;color:#111111;">
+                          ${escapeHtml(order.id)}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:28px 30px 0;">
+                      <h2 style="margin:0 0 12px;font-size:18px;font-weight:900;color:#111111;">
+                        Order Summary
+                      </h2>
+
+                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                        ${formatItemsHtml(order.items)}
+
                         <tr>
-                          <td style="padding:22px;">
-                            <div style="font-size:11px;font-weight:900;letter-spacing:3px;color:#da291c;text-transform:uppercase;">
-                              Order ID
-                            </div>
-
-                            <div style="margin-top:8px;font-size:20px;font-weight:900;color:#fffff;">
-                              ${escapeHtml(order.id)}
-                            </div>
+                          <td style="padding:18px 0;font-size:18px;font-weight:900;color:#111111;">
+                            Total
                           </td>
-
-                          <td align="right" style="padding:22px;">
-                            <div style="font-size:11px;font-weight:900;letter-spacing:3px;color:#da291c;text-transform:uppercase;">
-                              Total
-                            </div>
-
-                            <div style="margin-top:8px;font-size:28px;font-weight:900;color:#da291c;">
-                              $${order.total.toFixed(2)}
-                            </div>
+                          <td style="padding:18px 0;text-align:right;font-size:18px;font-weight:900;color:#111111;">
+                            $${order.total.toFixed(2)}
                           </td>
                         </tr>
                       </table>
@@ -406,51 +390,23 @@ async function sendBrevoEmail(order) {
                   </tr>
 
                   <tr>
-                    <td style="padding:24px 30px 0;">
-                      <div style="font-size:12px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#da291c;">
-                        Order Summary
-                      </div>
+                    <td style="padding:8px 30px 0;">
+                      <div style="background:#ffffff;border:1px solid #eeeeee;border-radius:14px;padding:20px;text-align:center;">
+                        <div style="font-size:12px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#006a4e;">
+                          Shipping Address
+                        </div>
 
-                      <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-                        ${itemsHtml}
-                      </table>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td style="padding:28px 30px 8px;">
-                      <div style="background:#f8f8f6;border-radius:24px;padding:22px;border:1px solid #eeeeee;">
-                        <div
-  style="
-    font-size:12px;
-    font-weight:900;
-    letter-spacing:3px;
-    text-transform:uppercase;
-    color:#006a4e;
-    text-align:center;
-  "
->
-  Shipping Address
-</div>
-
-                        <p
-  style="
-    margin:14px 0 0;
-    font-size:15px;
-    line-height:1.7;
-    color:#333333;
-    text-align:center;
-  "
->
+                        <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#333333;">
                           <strong>
-                            ${escapeHtml(order.customer.firstName)} ${escapeHtml(order.customer.lastName)},
-                            ${escapeHtml(order.customer.phone)}
-                            </strong><br />
+                            ${escapeHtml(order.customer.firstName)} ${escapeHtml(order.customer.lastName)}
+                          </strong><br />
+                          ${escapeHtml(order.customer.phone)}<br />
                           ${escapeHtml(order.customer.address)}<br />
-                          ${order.customer.apartment
-          ? `${escapeHtml(order.customer.apartment)}<br />`
-          : ""
-        }
+                          ${
+                            order.customer.apartment
+                              ? `${escapeHtml(order.customer.apartment)}<br />`
+                              : ""
+                          }
                           ${escapeHtml(order.customer.city)}, ${escapeHtml(order.customer.zip)}
                         </p>
                       </div>
@@ -540,6 +496,3 @@ const server = app.listen(PORT, () => {
 server.on("error", (error) => {
   console.error("SERVER ERROR:", error);
 });
-
-// Keeps local backend alive
-setInterval(() => { }, 1000);
