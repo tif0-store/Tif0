@@ -1,441 +1,502 @@
 import { Client } from "@notionhq/client";
 
 const notion = new Client({
-    auth: process.env.NOTION_TOKEN,
+  auth: process.env.NOTION_TOKEN,
 });
 
 const VALID_PRODUCTS = {
-    "flag-3pk": {
-        name: "3 Pack Flags",
-        price: 29.99,
-        category: "flags",
-        type: "bundle",
-        sizes: ["2x3ft", "3x5ft", "4x6ft"],
-        bundleCount: 3,
-    },
-
-    "flag-america": {
-        name: "America Flag",
-        price: 14.99,
-        category: "flags",
-        type: "single",
-        sizes: ["2x3ft", "3x5ft", "4x6ft"],
-    },
-
-    "flag-canada": {
-        name: "Canada Flag",
-        price: 14.99,
-        category: "flags",
-        type: "single",
-        sizes: ["2x3ft", "3x5ft", "4x6ft"],
-    },
-
-    "flag-mexico": {
-        name: "Mexico Flag",
-        price: 14.99,
-        category: "flags",
-        type: "single",
-        sizes: ["2x3ft", "3x5ft", "4x6ft"],
-    },
-
-    "jersey-brazil": {
-        name: "Brazil Jersey",
-        price: 34.99,
-        category: "jerseys",
-        type: "jersey",
-        sizes: ["S", "M", "L", "XL", "XXL"],
-    },
-
-    "jersey-portugal": {
-        name: "Portugal Jersey",
-        price: 34.99,
-        category: "jerseys",
-        type: "jersey",
-        sizes: ["S", "M", "L", "XL", "XXL"],
-    },
-
-    "jersey-argentina": {
-        name: "Argentina Jersey",
-        price: 34.99,
-        category: "jerseys",
-        type: "jersey",
-        sizes: ["S", "M", "L", "XL", "XXL"],
-    },
+  "flag-3pk": {
+    name: "3 Pack Flags",
+    price: 29.99,
+    category: "flags",
+    type: "bundle",
+    sizes: ["2x3ft", "3x5ft", "4x6ft"],
+    bundleCount: 3,
+  },
+  "flag-america": {
+    name: "America Flag",
+    price: 14.99,
+    category: "flags",
+    type: "single",
+    sizes: ["2x3ft", "3x5ft", "4x6ft"],
+  },
+  "flag-canada": {
+    name: "Canada Flag",
+    price: 14.99,
+    category: "flags",
+    type: "single",
+    sizes: ["2x3ft", "3x5ft", "4x6ft"],
+  },
+  "flag-mexico": {
+    name: "Mexico Flag",
+    price: 14.99,
+    category: "flags",
+    type: "single",
+    sizes: ["2x3ft", "3x5ft", "4x6ft"],
+  },
+  "jersey-brazil": {
+    name: "Brazil Jersey",
+    price: 34.99,
+    category: "jerseys",
+    type: "jersey",
+    sizes: ["S", "M", "L", "XL", "XXL"],
+  },
+  "jersey-portugal": {
+    name: "Portugal Jersey",
+    price: 34.99,
+    category: "jerseys",
+    type: "jersey",
+    sizes: ["S", "M", "L", "XL", "XXL"],
+  },
+  "jersey-argentina": {
+    name: "Argentina Jersey",
+    price: 34.99,
+    category: "jerseys",
+    type: "jersey",
+    sizes: ["S", "M", "L", "XL", "XXL"],
+  },
 };
 
 const VALID_WORLD_CUP_NATIONS = new Set([
-    "Argentina",
-    "Australia",
-    "Belgium",
-    "Brazil",
-    "Canada",
-    "Colombia",
-    "Croatia",
-    "Denmark",
-    "England",
-    "France",
-    "Germany",
-    "Ghana",
-    "Iran",
-    "Italy",
-    "Japan",
-    "Mexico",
-    "Morocco",
-    "Netherlands",
-    "Portugal",
-    "Qatar",
-    "Saudi Arabia",
-    "Senegal",
-    "South Korea",
-    "Spain",
-    "Switzerland",
-    "Tunisia",
-    "Uruguay",
-    "USA",
-    "Wales",
+  "Argentina",
+  "Australia",
+  "Belgium",
+  "Brazil",
+  "Canada",
+  "Colombia",
+  "Croatia",
+  "Denmark",
+  "England",
+  "France",
+  "Germany",
+  "Ghana",
+  "Iran",
+  "Italy",
+  "Japan",
+  "Mexico",
+  "Morocco",
+  "Netherlands",
+  "Portugal",
+  "Qatar",
+  "Saudi Arabia",
+  "Senegal",
+  "South Korea",
+  "Spain",
+  "Switzerland",
+  "Tunisia",
+  "Uruguay",
+  "USA",
+  "Wales",
 ]);
 
 function roundMoney(value) {
-    return Math.round(Number(value) * 100) / 100;
+  return Math.round(Number(value) * 100) / 100;
 }
 
 function escapeHtml(value = "") {
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function validateCustomer(customer) {
-    if (!customer || typeof customer !== "object") {
-        throw new Error("Customer details are required.");
+  if (!customer || typeof customer !== "object") {
+    throw new Error("Customer details are required.");
+  }
+
+  const requiredFields = ["firstName", "lastName", "email", "address"];
+
+  for (const field of requiredFields) {
+    if (!String(customer[field] || "").trim()) {
+      throw new Error(`Customer ${field} is required.`);
     }
+  }
 
-    const requiredFields = ["firstName", "lastName", "email", "address"];
+  const email = String(customer.email).trim();
 
-    for (const field of requiredFields) {
-        if (!String(customer[field] || "").trim()) {
-            throw new Error(`Customer ${field} is required.`);
-        }
-    }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("A valid email address is required.");
+  }
 
-    const email = String(customer.email).trim();
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        throw new Error("A valid email address is required.");
-    }
-
-    return {
-        firstName: String(customer.firstName).trim(),
-        lastName: String(customer.lastName).trim(),
-        email,
-        phone: String(customer.phone || "").trim(),
-        address: String(customer.address).trim(),
-        apartment: String(customer.apartment || "").trim(),
-        city: String(customer.city || "").trim(),
-        zip: String(customer.zip || "").trim(),
-    };
+  return {
+    firstName: String(customer.firstName).trim(),
+    lastName: String(customer.lastName).trim(),
+    email,
+    phone: String(customer.phone || "").trim(),
+    address: String(customer.address).trim(),
+    apartment: String(customer.apartment || "").trim(),
+    city: String(customer.city || "").trim(),
+    zip: String(customer.zip || "").trim(),
+  };
 }
 
 function validateItems(items) {
-    if (!Array.isArray(items) || items.length === 0) {
-        throw new Error("At least one item is required.");
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error("At least one item is required.");
+  }
+
+  return items.map((item) => {
+    const product = VALID_PRODUCTS[item?.id];
+
+    if (!product) {
+      throw new Error("Invalid product selected.");
     }
 
-    return items.map((item) => {
-        const product = VALID_PRODUCTS[item?.id];
+    const quantity = Number(item.quantity);
 
-        if (!product) {
-            throw new Error("Invalid product selected.");
-        }
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
+      throw new Error(`Invalid quantity for ${product.name}.`);
+    }
 
-        const quantity = Number(item.quantity);
+    const selectedSize = String(item.selectedSize || "").trim();
 
-        if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
-            throw new Error(`Invalid quantity for ${product.name}.`);
-        }
+    if (!product.sizes.includes(selectedSize)) {
+      throw new Error(`Invalid size selected for ${product.name}.`);
+    }
 
-        const selectedSize = String(item.selectedSize || "").trim();
+    let selectedCountries = [];
 
-        if (!product.sizes.includes(selectedSize)) {
-            throw new Error(`Invalid size selected for ${product.name}.`);
-        }
+    if (product.type === "bundle") {
+      selectedCountries = Array.isArray(item.selectedCountries)
+        ? item.selectedCountries.map((country) => String(country).trim()).filter(Boolean)
+        : [];
 
-        let selectedCountries = [];
+      if (selectedCountries.length !== product.bundleCount) {
+        throw new Error(`${product.name} requires exactly ${product.bundleCount} flags.`);
+      }
 
-        if (product.type === "bundle") {
-            selectedCountries = Array.isArray(item.selectedCountries)
-                ? item.selectedCountries
-                    .map((country) => String(country).trim())
-                    .filter(Boolean)
-                : [];
+      if (new Set(selectedCountries).size !== selectedCountries.length) {
+        throw new Error("Bundle flags must be different countries.");
+      }
 
-            if (selectedCountries.length !== product.bundleCount) {
-                throw new Error(
-                    `${product.name} requires exactly ${product.bundleCount} flags.`
-                );
-            }
+      const invalidCountry = selectedCountries.find(
+        (country) => !VALID_WORLD_CUP_NATIONS.has(country)
+      );
 
-            if (new Set(selectedCountries).size !== selectedCountries.length) {
-                throw new Error("Bundle flags must be different countries.");
-            }
+      if (invalidCountry) {
+        throw new Error(`Invalid bundle country: ${invalidCountry}.`);
+      }
+    }
 
-            const invalidCountry = selectedCountries.find(
-                (country) => !VALID_WORLD_CUP_NATIONS.has(country)
-            );
-
-            if (invalidCountry) {
-                throw new Error(`Invalid bundle country: ${invalidCountry}.`);
-            }
-        }
-
-        return {
-            id: item.id,
-            name: product.name,
-            category: product.category,
-            type: product.type,
-            quantity,
-            price: product.price,
-            selectedSize,
-            selectedSizeLabel: item.selectedSizeLabel || selectedSize,
-            selectedCountries,
-            lineTotal: roundMoney(product.price * quantity),
-        };
-    });
+    return {
+      id: item.id,
+      name: product.name,
+      category: product.category,
+      type: product.type,
+      quantity,
+      price: product.price,
+      selectedSize,
+      selectedSizeLabel: item.selectedSizeLabel || selectedSize,
+      selectedCountries,
+      lineTotal: roundMoney(product.price * quantity),
+    };
+  });
 }
 
 function formatItemLine(item) {
-    const size = item.selectedSizeLabel || item.selectedSize || "One Size";
+  const size = item.selectedSizeLabel || item.selectedSize || "One Size";
+  const countries = item.selectedCountries?.length
+    ? `\nFlags: ${item.selectedCountries.join(", ")}`
+    : "";
 
-    const countries = item.selectedCountries?.length
-        ? `\n   Flags: ${item.selectedCountries.join(", ")}`
-        : "";
-
-    return `${item.quantity}x ${item.name} (${size}) — $${item.price.toFixed(
-        2
-    )} each${countries}`;
+  return `${item.quantity}x ${item.name} (${size}) — $${item.price.toFixed(
+    2
+  )} each${countries}`;
 }
 
 function formatItems(items = []) {
-    return items.map(formatItemLine).join("\n");
+  return items.map(formatItemLine).join("\n");
 }
 
-function formatItemsHtml(items = []) {
-    return items
-        .map((item) => {
-            const size = escapeHtml(
-                item.selectedSizeLabel || item.selectedSize || "One Size"
-            );
+function buildOrderEmailHtml(order) {
+  const itemsHtml = order.items
+    .map((item) => {
+      const size = escapeHtml(item.selectedSizeLabel || item.selectedSize || "One Size");
 
-            const countries = item.selectedCountries?.length
-                ? `<br /><small><strong>Flags:</strong> ${escapeHtml(
-                    item.selectedCountries.join(", ")
-                )}</small>`
-                : "";
+      const countries = item.selectedCountries?.length
+        ? `
+          <div style="margin-top:7px;font-size:13px;line-height:1.5;color:#6b6b6b;">
+            Flags: ${escapeHtml(item.selectedCountries.join(", "))}
+          </div>
+        `
+        : "";
 
-            return `
-        <li>
-          ${item.quantity}x ${escapeHtml(item.name)} (${size}) — $${item.price.toFixed(
-                2
-            )}
-          ${countries}
-        </li>
+      return `
+        <tr>
+          <td style="padding:16px 0;border-bottom:1px solid #eeeeee;">
+            <div style="font-size:15px;font-weight:800;color:#111111;">
+              ${item.quantity}x ${escapeHtml(item.name)}
+            </div>
+            <div style="margin-top:5px;font-size:13px;color:#777777;">
+              Size: ${size}
+            </div>
+            ${countries}
+          </td>
+          <td style="padding:16px 0;border-bottom:1px solid #eeeeee;text-align:right;font-size:15px;font-weight:900;color:#111111;">
+            $${item.lineTotal.toFixed(2)}
+          </td>
+        </tr>
       `;
-        })
-        .join("");
+    })
+    .join("");
+
+  return `
+    <div style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;color:#111111;">
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f4f4f4;padding:32px 12px;">
+        <tr>
+          <td align="center">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:650px;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #e8e8e8;">
+              
+              <tr>
+                <td style="padding:38px 30px 30px;text-align:center;background:#ffffff;">
+                  <div style="display:inline-block;border:2px solid #111111;border-radius:999px;padding:10px 18px;font-size:28px;font-weight:900;letter-spacing:5px;color:#111111;">
+                    TIF0
+                  </div>
+
+                  <div style="margin-top:18px;font-size:12px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#006a4e;">
+                    Order Confirmed
+                  </div>
+
+                  <h1 style="margin:18px 0 0;font-size:30px;line-height:1.25;font-weight:900;color:#111111;">
+                    Thank you, ${escapeHtml(order.customer.firstName)}.
+                  </h1>
+
+                  <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#555555;">
+                    Your TIF0 order is confirmed. We’ll review it and contact you soon with the next steps.
+                  </p>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:0 30px 24px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                    <tr>
+                      <td width="50%" style="padding:10px;">
+                        <div style="background:#f7f7f7;border:1px solid #eeeeee;border-radius:16px;padding:18px;text-align:center;">
+                          <div style="font-size:11px;font-weight:900;letter-spacing:2px;color:#777777;text-transform:uppercase;">
+                            Order ID
+                          </div>
+                          <div style="margin-top:8px;font-size:16px;font-weight:900;color:#111111;">
+                            ${escapeHtml(order.id)}
+                          </div>
+                        </div>
+                      </td>
+                      <td width="50%" style="padding:10px;">
+                        <div style="background:#f7f7f7;border:1px solid #eeeeee;border-radius:16px;padding:18px;text-align:center;">
+                          <div style="font-size:11px;font-weight:900;letter-spacing:2px;color:#777777;text-transform:uppercase;">
+                            Total
+                          </div>
+                          <div style="margin-top:8px;font-size:16px;font-weight:900;color:#111111;">
+                            $${order.total.toFixed(2)}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:0 34px 10px;">
+                  <h2 style="margin:0 0 10px;font-size:18px;font-weight:900;color:#111111;">
+                    Order Summary
+                  </h2>
+
+                  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                    ${itemsHtml}
+                    <tr>
+                      <td style="padding:20px 0;font-size:18px;font-weight:900;color:#111111;">
+                        Total
+                      </td>
+                      <td style="padding:20px 0;text-align:right;font-size:18px;font-weight:900;color:#111111;">
+                        $${order.total.toFixed(2)}
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:8px 34px 0;">
+                  <div style="border:1px solid #eeeeee;border-radius:16px;padding:22px;text-align:center;background:#ffffff;">
+                    <div style="font-size:12px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#006a4e;">
+                      Shipping Address
+                    </div>
+
+                    <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#333333;">
+                      <strong>
+                        ${escapeHtml(order.customer.firstName)} ${escapeHtml(order.customer.lastName)}
+                        ${order.customer.phone ? `, ${escapeHtml(order.customer.phone)}` : ""}
+                      </strong><br />
+                      ${escapeHtml(order.customer.address)}<br />
+                      ${
+                        order.customer.apartment
+                          ? `${escapeHtml(order.customer.apartment)}<br />`
+                          : ""
+                      }
+                      ${escapeHtml(order.customer.city)}, ${escapeHtml(order.customer.zip)}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <td style="padding:28px 34px 36px;text-align:center;">
+                  <p style="margin:0;font-size:14px;line-height:1.7;color:#666666;">
+                    Keep this email for your records. Reply here if you need help with your order.
+                  </p>
+
+                  <div style="margin-top:24px;padding-top:22px;border-top:1px solid #eeeeee;">
+                    <div style="font-size:18px;font-weight:900;letter-spacing:3px;color:#111111;">
+                      TIF0
+                    </div>
+
+                    <div style="margin-top:8px;font-size:11px;font-weight:800;letter-spacing:2px;color:#888888;text-transform:uppercase;">
+                      Football culture. National pride. Streetwear energy.
+                    </div>
+                  </div>
+                </td>
+              </tr>
+
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  `;
 }
 
 async function sendBrevoEmail(order) {
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-        method: "POST",
-        headers: {
-            "api-key": process.env.BREVO_API_KEY,
-            "Content-Type": "application/json",
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: {
+      "api-key": process.env.BREVO_API_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      sender: {
+        name: process.env.BREVO_SENDER_NAME,
+        email: process.env.BREVO_SENDER_EMAIL,
+      },
+      to: [
+        {
+          email: order.customer.email,
+          name: `${order.customer.firstName} ${order.customer.lastName}`,
         },
-        body: JSON.stringify({
-            sender: {
-                name: process.env.BREVO_SENDER_NAME,
-                email: process.env.BREVO_SENDER_EMAIL,
-            },
+      ],
+      subject: `Your TIF0 order is confirmed — ${order.id}`,
+      htmlContent: buildOrderEmailHtml(order),
+    }),
+  });
 
-            to: [
-                {
-                    email: order.customer.email,
-                    name: `${order.customer.firstName} ${order.customer.lastName}`,
-                },
-            ],
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Brevo email failed: ${error}`);
+  }
 
-            subject: `Your TIF0 order is confirmed — ${order.id}`,
-
-            htmlContent: `
-        <div style="font-family: Arial, sans-serif; padding: 24px;">
-          <h2>Thank you for your order, ${escapeHtml(
-                order.customer.firstName
-            )}!</h2>
-
-          <p>Your TIF0 order has been received successfully.</p>
-
-          <div style="margin-top: 24px;">
-            <p><strong>Order ID:</strong> ${escapeHtml(order.id)}</p>
-            <p><strong>Total:</strong> $${order.total.toFixed(2)}</p>
-          </div>
-
-          <div style="margin-top: 24px;">
-            <h3>Items</h3>
-
-            <ul>
-              ${formatItemsHtml(order.items)}
-            </ul>
-          </div>
-
-          <div style="margin-top: 24px;">
-            <h3>Shipping Address</h3>
-
-            <p>
-              ${escapeHtml(order.customer.firstName)} ${escapeHtml(
-                order.customer.lastName
-            )}<br />
-              ${escapeHtml(order.customer.address)}<br />
-              ${escapeHtml(order.customer.apartment || "")}<br />
-              ${escapeHtml(order.customer.city)}, ${escapeHtml(
-                order.customer.zip
-            )}
-            </p>
-          </div>
-
-          <p style="margin-top: 32px;">
-            We’ll contact you soon with updates regarding your order.
-          </p>
-
-          <p>
-            <strong>TIF0</strong>
-          </p>
-        </div>
-      `,
-        }),
-    });
-
-    if (!response.ok) {
-        const error = await response.text();
-
-        throw new Error(`Brevo email failed: ${error}`);
-    }
-
-    return response.json();
+  return response.json();
 }
 
 async function saveOrderToNotion(order) {
-    return notion.pages.create({
-        parent: {
-            database_id: process.env.NOTION_ORDERS_DATABASE_ID,
+  return notion.pages.create({
+    parent: {
+      database_id: process.env.NOTION_ORDERS_DATABASE_ID,
+    },
+    properties: {
+      "Order ID": {
+        title: [{ text: { content: order.id } }],
+      },
+      "Customer Name": {
+        rich_text: [
+          {
+            text: {
+              content: `${order.customer.firstName} ${order.customer.lastName}`,
+            },
+          },
+        ],
+      },
+      Email: {
+        email: order.customer.email,
+      },
+      Phone: {
+        phone_number: order.customer.phone || "",
+      },
+      Address: {
+        rich_text: [
+          {
+            text: {
+              content: `${order.customer.address} ${
+                order.customer.apartment || ""
+              }, ${order.customer.city}, ${order.customer.zip}`,
+            },
+          },
+        ],
+      },
+      Items: {
+        rich_text: [
+          {
+            text: {
+              content: formatItems(order.items),
+            },
+          },
+        ],
+      },
+      Total: {
+        number: order.total,
+      },
+      Status: {
+        status: {
+          name: "Pending",
         },
-
-        properties: {
-            "Order ID": {
-                title: [
-                    {
-                        text: {
-                            content: order.id,
-                        },
-                    },
-                ],
-            },
-
-            "Customer Name": {
-                rich_text: [
-                    {
-                        text: {
-                            content: `${order.customer.firstName} ${order.customer.lastName}`,
-                        },
-                    },
-                ],
-            },
-
-            Email: {
-                email: order.customer.email,
-            },
-
-            Phone: {
-                phone_number: order.customer.phone || "",
-            },
-
-            Address: {
-                rich_text: [
-                    {
-                        text: {
-                            content: `${order.customer.address} ${order.customer.apartment || ""
-                                }, ${order.customer.city}, ${order.customer.zip}`,
-                        },
-                    },
-                ],
-            },
-
-            Items: {
-                rich_text: [
-                    {
-                        text: {
-                            content: formatItems(order.items),
-                        },
-                    },
-                ],
-            },
-
-            Total: {
-                number: order.total,
-            },
-
-            Status: {
-                status: {
-                    name: "Pending",
-                },
-            },
-        },
-    });
+      },
+    },
+  });
 }
 
 export default async function handler(req, res) {
-    if (req.method !== "POST") {
-        return res.status(405).json({
-            success: false,
-            message: "Method not allowed",
-        });
-    }
+  if (req.method !== "POST") {
+    return res.status(405).json({
+      success: false,
+      message: "Method not allowed",
+    });
+  }
 
-    try {
-        const { customer, items } = req.body;
+  try {
+    const { customer, items } = req.body;
 
-        const validatedCustomer = validateCustomer(customer);
-        const validatedItems = validateItems(items);
+    const validatedCustomer = validateCustomer(customer);
+    const validatedItems = validateItems(items);
 
-        const calculatedSubtotal = roundMoney(
-            validatedItems.reduce((sum, item) => sum + item.lineTotal, 0)
-        );
+    const calculatedSubtotal = roundMoney(
+      validatedItems.reduce((sum, item) => sum + item.lineTotal, 0)
+    );
 
-        const order = {
-            id: `TIF0-${Date.now()}`,
-            customer: validatedCustomer,
-            items: validatedItems,
-            subtotal: calculatedSubtotal,
-            total: calculatedSubtotal,
-            createdAt: new Date().toISOString(),
-        };
+    const order = {
+      id: `TIF0-${Date.now()}`,
+      customer: validatedCustomer,
+      items: validatedItems,
+      subtotal: calculatedSubtotal,
+      total: calculatedSubtotal,
+      createdAt: new Date().toISOString(),
+    };
 
-        await saveOrderToNotion(order);
-        await sendBrevoEmail(order);
+    await saveOrderToNotion(order);
+    await sendBrevoEmail(order);
 
-        return res.status(201).json({
-            success: true,
-            orderId: order.id,
-            total: order.total,
-        });
-    } catch (error) {
-        console.error(error);
+    return res.status(201).json({
+      success: true,
+      orderId: order.id,
+      total: order.total,
+    });
+  } catch (error) {
+    console.error(error);
 
-        return res.status(400).json({
-            success: false,
-            message: error.message || "Order failed.",
-        });
-    }
+    return res.status(400).json({
+      success: false,
+      message: error.message || "Order failed.",
+    });
+  }
 }
