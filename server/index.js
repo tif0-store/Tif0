@@ -334,7 +334,7 @@ async function sendBrevoEmail(order) {
                   <tr>
                     <td style="background:#ffffff;padding:34px 28px;text-align:center;">
   <a
-    href=""
+    href="https://tif0-store-tif0-s-projects.vercel.app"
     target="_blank"
     style="text-decoration:none;display:inline-block;"
   >
