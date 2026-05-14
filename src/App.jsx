@@ -2367,13 +2367,37 @@ function ReviewPage({ cart, customer, clearCart }) {
   const subtotal = getCartSubtotal(cart);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const placeOrder = () => {
-    if (isSubmitting) return;
+  const placeOrder = async () => {
+  if (isSubmitting) return;
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
+
+  try {
+    const response = await fetch("/api/orders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        customer,
+        items: cart,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || "Order failed.");
+    }
+
     clearCart();
     navigate("/checkout/success");
-  };
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   
 
   return (
