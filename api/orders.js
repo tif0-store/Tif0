@@ -218,7 +218,7 @@ function buildOrderEmailHtml(order) {
 
       const countries = item.selectedCountries?.length
         ? `
-          <div style="margin-top:7px;font-size:13px;line-height:1.5;color:#6b6b6b;">
+          <div style="margin-top:6px;font-size:13px;color:#666666;">
             Flags: ${escapeHtml(item.selectedCountries.join(", "))}
           </div>
         `
@@ -227,7 +227,7 @@ function buildOrderEmailHtml(order) {
       return `
         <tr>
           <td style="padding:16px 0;border-bottom:1px solid #eeeeee;">
-            <div style="font-size:15px;font-weight:800;color:#111111;">
+            <div style="font-size:15px;font-weight:900;color:#111111;">
               ${item.quantity}x ${escapeHtml(item.name)}
             </div>
             <div style="margin-top:5px;font-size:13px;color:#777777;">
@@ -235,7 +235,7 @@ function buildOrderEmailHtml(order) {
             </div>
             ${countries}
           </td>
-          <td style="padding:16px 0;border-bottom:1px solid #eeeeee;text-align:right;font-size:15px;font-weight:900;color:#111111;">
+          <td style="padding:16px 0;border-bottom:1px solid #eeeeee;text-align:right;font-size:15px;font-weight:900;color:#da291c;">
             $${item.lineTotal.toFixed(2)}
           </td>
         </tr>
@@ -244,54 +244,64 @@ function buildOrderEmailHtml(order) {
     .join("");
 
   return `
-    <div style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,Helvetica,sans-serif;color:#111111;">
-      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f4f4f4;padding:32px 12px;">
+    <div style="margin:0;padding:0;font-family:Arial,Helvetica,sans-serif;color:#111111;">
+      <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f8f8f6;padding:34px 12px;">
         <tr>
           <td align="center">
-            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:650px;background:#ffffff;border-radius:18px;overflow:hidden;border:1px solid #e8e8e8;">
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:640px;background:#ffffff;border-radius:30px;overflow:hidden;border:2px solid #da291c;">
               
               <tr>
-                <td style="padding:38px 30px 30px;text-align:center;background:#ffffff;">
-                  <div style="display:inline-block;border:2px solid #111111;border-radius:999px;padding:10px 18px;font-size:28px;font-weight:900;letter-spacing:5px;color:#111111;">
-                    TIF0
-                  </div>
+                <td style="background:#ffffff;padding:34px 28px;text-align:center;">
+                  <img
+                    src="https://doeantbttqofenfvmjyo.supabase.co/storage/v1/object/public/Tif0/TIF0.png"
+                    alt="TIF0"
+                    width="180"
+                    style="display:block;margin:0 auto;width:180px;max-width:180px;height:auto;border:0;outline:none;text-decoration:none;"
+                  />
 
-                  <div style="margin-top:18px;font-size:12px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#006a4e;">
+                  <div style="margin-top:12px;font-size:12px;font-weight:900;letter-spacing:4px;color:#000000;text-transform:uppercase;">
                     Order Confirmed
                   </div>
+                </td>
+              </tr>
 
-                  <h1 style="margin:18px 0 0;font-size:30px;line-height:1.25;font-weight:900;color:#111111;">
+              <tr>
+                <td style="padding:34px 30px 18px;text-align:center;">
+                  <div style="display:inline-block;background:#006a4e;color:#ffffff;border-radius:999px;padding:10px 18px;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">
+                    We received your order
+                  </div>
+
+                  <h1 style="margin:22px 0 0;font-size:32px;line-height:1.15;color:#111111;">
                     Thank you, ${escapeHtml(order.customer.firstName)}.
                   </h1>
 
-                  <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#555555;">
+                  <p style="margin:14px auto 0;max-width:440px;font-size:15px;line-height:1.7;color:#555555;">
                     Your TIF0 order is confirmed. We’ll review it and contact you soon with the next steps.
                   </p>
                 </td>
               </tr>
 
               <tr>
-                <td style="padding:0 30px 24px;">
-                  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                <td style="padding:12px 30px;">
+                  <table width="100%" role="presentation" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:24px;border:2px solid #da291c;">
                     <tr>
-                      <td width="50%" style="padding:10px;">
-                        <div style="background:#f7f7f7;border:1px solid #eeeeee;border-radius:16px;padding:18px;text-align:center;">
-                          <div style="font-size:11px;font-weight:900;letter-spacing:2px;color:#777777;text-transform:uppercase;">
-                            Order ID
-                          </div>
-                          <div style="margin-top:8px;font-size:16px;font-weight:900;color:#111111;">
-                            ${escapeHtml(order.id)}
-                          </div>
+                      <td style="padding:22px;">
+                        <div style="font-size:11px;font-weight:900;letter-spacing:3px;color:#da291c;text-transform:uppercase;">
+                          Order ID
+                        </div>
+
+                        <div style="margin-top:8px;font-size:20px;font-weight:900;color:#111111;">
+                          ${escapeHtml(order.id)}
                         </div>
                       </td>
-                      <td width="50%" style="padding:10px;">
-                        <div style="background:#f7f7f7;border:1px solid #eeeeee;border-radius:16px;padding:18px;text-align:center;">
-                          <div style="font-size:11px;font-weight:900;letter-spacing:2px;color:#777777;text-transform:uppercase;">
-                            Total
-                          </div>
-                          <div style="margin-top:8px;font-size:16px;font-weight:900;color:#111111;">
-                            $${order.total.toFixed(2)}
-                          </div>
+
+                      <td align="right" style="padding:22px;">
+                        <div style="font-size:11px;font-weight:900;letter-spacing:3px;color:#da291c;text-transform:uppercase;">
+                          Total
+                        </div>
+
+                        <div style="margin-top:8px;font-size:28px;font-weight:900;color:#da291c;">
+                          $${order.total.toFixed(2)}
                         </div>
                       </td>
                     </tr>
@@ -300,33 +310,25 @@ function buildOrderEmailHtml(order) {
               </tr>
 
               <tr>
-                <td style="padding:0 34px 10px;">
-                  <h2 style="margin:0 0 10px;font-size:18px;font-weight:900;color:#111111;">
+                <td style="padding:24px 30px 0;">
+                  <div style="font-size:12px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#da291c;">
                     Order Summary
-                  </h2>
+                  </div>
 
                   <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                     ${itemsHtml}
-                    <tr>
-                      <td style="padding:20px 0;font-size:18px;font-weight:900;color:#111111;">
-                        Total
-                      </td>
-                      <td style="padding:20px 0;text-align:right;font-size:18px;font-weight:900;color:#111111;">
-                        $${order.total.toFixed(2)}
-                      </td>
-                    </tr>
                   </table>
                 </td>
               </tr>
 
               <tr>
-                <td style="padding:8px 34px 0;">
-                  <div style="border:1px solid #eeeeee;border-radius:16px;padding:22px;text-align:center;background:#ffffff;">
-                    <div style="font-size:12px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#006a4e;">
+                <td style="padding:28px 30px 8px;">
+                  <div style="background:#f8f8f6;border-radius:24px;padding:22px;border:1px solid #eeeeee;">
+                    <div style="font-size:12px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#006a4e;text-align:center;">
                       Shipping Address
                     </div>
 
-                    <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#333333;">
+                    <p style="margin:14px 0 0;font-size:15px;line-height:1.7;color:#333333;text-align:center;">
                       <strong>
                         ${escapeHtml(order.customer.firstName)} ${escapeHtml(order.customer.lastName)}
                         ${order.customer.phone ? `, ${escapeHtml(order.customer.phone)}` : ""}
@@ -344,7 +346,7 @@ function buildOrderEmailHtml(order) {
               </tr>
 
               <tr>
-                <td style="padding:28px 34px 36px;text-align:center;">
+                <td style="padding:26px 30px 34px;text-align:center;">
                   <p style="margin:0;font-size:14px;line-height:1.7;color:#666666;">
                     Keep this email for your records. Reply here if you need help with your order.
                   </p>
