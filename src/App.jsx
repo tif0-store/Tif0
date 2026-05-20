@@ -24,7 +24,7 @@ const INSTAGRAM_HANDLE = "@tif0.bd";
 const FACEBOOK_ID = "61567978760829";
 const WHATSAPP_NUMBER = "+8801701210000";
 const BANGLADESH_GREEN = "#006a4e";
-const LOGO_SRC = "/logo.png";
+const LOGO_SRC = "/logo.webp";
 const NAVBAR_HEIGHT = 96;
 const CURRENCY = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -319,7 +319,7 @@ function runSelfTests() {
 
   console.assert(getHeroIndex(0, "prev", 2) === 1, "Previous should wrap");
   console.assert(getHeroIndex(1, "next", 2) === 0, "Next should wrap");
-  console.assert(heroImages[0].image === "/Home-1.png", "Home hero asset should point to /Home-1.png");
+  console.assert(heroImages[0].image === "/Home-1.webp", "Home hero asset should point to /Home-1.png");
 }
 
 function IconBase({ children, className = "", size = 18, strokeWidth = 1.8, style }) {
