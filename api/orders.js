@@ -253,7 +253,7 @@ function buildOrderEmailHtml(order) {
               <tr>
                 <td style="background:#ffffff;padding:34px 28px;text-align:center;">
                   <img
-                    src="https://tif0-store-tif0-s-projects.vercel.app/logo.png"
+                    src="https://tif0-store-tif0-s-projects.vercel.app/email-logo.png"
                     alt="TIF0"
                     width="180"
                     style="display:block;margin:0 auto;width:180px;max-width:180px;height:auto;border:0;outline:none;text-decoration:none;"
