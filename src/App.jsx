@@ -184,14 +184,14 @@ const heroImages = [
     id: "hero-1",
     title: "Streetwear Flags Drop",
     subtitle: "Bold colors. Clean fits. Everyday statement pieces.",
-    image: "/Home-1.png",
+    image: "/Home-1.webp",
     fit: "cover",
   },
   {
     id: "hero-2",
     title: "Jerseys That Stand Out",
     subtitle: "Oversized cuts and match-day energy with a premium look.",
-    image: "/Home-2.png",
+    image: "/Home-2.webp",
     fit: "cover",
   },
 ];
