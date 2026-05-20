@@ -67,15 +67,15 @@ export const products = [
     sizeType: SIZE_TYPES.FLAGS,
     bundleCount: 3,
     customBundle: true,
-    image: "/flag-3pk.png",
+    image: "/flag-3pk.webp",
     fit: "cover",
     featured: true,
 
     gallery: [
-      "/flag-3pk.png",
-      "/flags/bundle-back.png",
-      "/flags/bundle-close.png",
-      "/flags/flag-size-chart.png",
+      "/flag-3pk.webp",
+      "/flags/bundle-back.webp",
+      "/flags/bundle-close.webp",
+      "/flags/flag-size-chart.webp",
     ],
   },
 
@@ -87,15 +87,15 @@ export const products = [
     category: PRODUCT_CATEGORIES.FLAGS,
     type: "single",
     sizeType: SIZE_TYPES.FLAGS,
-    image: "/F1.png",
+    image: "/F1.webp",
     fit: "cover",
     featured: true,
 
     gallery: [
-      "/F1.png",
-      "/flags/america-back.png",
-      "/flags/america-close.png",
-      "/flags/flag-size-chart.png",
+      "/F1.webp",
+      "/flags/america-back.webp",
+      "/flags/america-close.webp",
+      "/flags/flag-size-chart.webp",
     ],
   },
 
@@ -107,14 +107,14 @@ export const products = [
     category: PRODUCT_CATEGORIES.FLAGS,
     type: "single",
     sizeType: SIZE_TYPES.FLAGS,
-    image: "/F2.png",
+    image: "/F2.webp",
     fit: "cover",
 
     gallery: [
-      "/F2.png",
-      "/flags/canada-back.png",
-      "/flags/canada-close.png",
-      "/flags/flag-size-chart.png",
+      "/F2.webp",
+      "/flags/canada-back.webp",
+      "/flags/canada-close.webp",
+      "/flags/flag-size-chart.webp",
     ],
   },
 
@@ -126,14 +126,14 @@ export const products = [
     category: PRODUCT_CATEGORIES.FLAGS,
     type: "single",
     sizeType: SIZE_TYPES.FLAGS,
-    image: "/F3.png",
+    image: "/F3.webp",
     fit: "cover",
 
     gallery: [
-      "/F3.png",
-      "/flags/mexico-back.png",
-      "/flags/mexico-close.png",
-      "/flags/flag-size-chart.png",
+      "/F3.webp",
+      "/flags/mexico-back.webp",
+      "/flags/mexico-close.webp",
+      "/flags/flag-size-chart.webp",
     ],
   },
 
@@ -145,15 +145,15 @@ export const products = [
     category: PRODUCT_CATEGORIES.JERSEYS,
     type: "jersey",
     sizeType: SIZE_TYPES.JERSEYS,
-    image: "/J1.png",
+    image: "/J1.webp",
     fit: "cover",
     featured: true,
 
     gallery: [
-      "/J1.png",
-      "/jerseys/brazil-back.png",
-      "/jerseys/brazil-close.png",
-      "/jerseys/jersey-size-chart.png",
+      "/J1.webp",
+      "/jerseys/brazil-back.webp",
+      "/jerseys/brazil-close.webp",
+      "/jerseys/jersey-size-chart.webp",
     ],
   },
 
@@ -165,14 +165,14 @@ export const products = [
     category: PRODUCT_CATEGORIES.JERSEYS,
     type: "jersey",
     sizeType: SIZE_TYPES.JERSEYS,
-    image: "/J2.png",
+    image: "/J2.webp",
     fit: "cover",
 
     gallery: [
-      "/J2.png",
-      "/jerseys/portugal-back.png",
-      "/jerseys/portugal-close.png",
-      "/jerseys/jersey-size-chart.png",
+      "/J2.webp",
+      "/jerseys/portugal-back.webp",
+      "/jerseys/portugal-close.webp",
+      "/jerseys/jersey-size-chart.webp",
     ],
   },
 
@@ -184,15 +184,15 @@ export const products = [
     category: PRODUCT_CATEGORIES.JERSEYS,
     type: "jersey",
     sizeType: SIZE_TYPES.JERSEYS,
-    image: "/J3.png",
+    image: "/J3.webp",
     fit: "cover",
     featured: true,
 
     gallery: [
-      "/J3.png",
-      "/jerseys/argentina-back.png",
-      "/jerseys/argentina-close.png",
-      "/jerseys/jersey-size-chart.png",
+      "/J3.webp",
+      "/jerseys/argentina-back.webp",
+      "/jerseys/argentina-close.webp",
+      "/jerseys/jersey-size-chart.webp",
     ],
   },
 ];
