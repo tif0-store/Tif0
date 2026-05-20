@@ -812,14 +812,14 @@ function CollectionTiles() {
       buttonLabel: "Shop Jerseys",
       text: "Explore the latest Tif0 jerseys.",
       href: "/jerseys",
-      image: "/collection-flags.jpg",
+      image: "/collection-jersey.webp",
     },
     {
       title: "Flags",
       buttonLabel: "Shop Flags",
       text: "Browse Tif0 flags.",
       href: "/flags",
-      image: "/collection-flags.png",
+      image: "/collection-flags.webp",
     },
   ];
 
